@@ -1,8 +1,10 @@
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/connection');
+const bcrpyt = require('bcrypt');
 
 // create our User model
 class User extends Model {}
+
 
 // define table columns and configuration
 User.init(
@@ -45,6 +47,17 @@ User.init(
       }
     },
     {
+    hooks: {
+      // set up beforecreate lifecycle hook
+      async beforeCreate(newUserData) {
+        newUserData.password = await bcrpyt.hash(newUserData.password, 10);
+        return newUserData;
+      },
+      async beforeUpdated(updatedUserData) {
+        updatedUserData.password = await bcrpyt.hash(updatedUserData.password, 10);
+        return updatedUserData;
+      }
+      },
       sequelize,
       timestamps: false,
       freezeTableName: true,
